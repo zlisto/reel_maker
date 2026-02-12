@@ -1,11 +1,13 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 import { generateScenes, generateImage, generateTTS, fetchElevenLabsVoices } from './services/gemini';
 import { assembleVideo } from './services/ffmpegService';
+import { createAssistantChat, sendAssistantMessage } from './services/apiService';
 import MovieInput from './components/MovieInput';
 import AnchorImages from './components/AnchorImages';
 import AnimatedDots from './components/AnimatedDots';
 import SceneEditor from './components/SceneEditor';
 import VideoAssembly from './components/VideoAssembly';
+import ChatAssistant from './components/ChatAssistant';
 
 function getProjectName() {
   const now = new Date();
@@ -38,6 +40,10 @@ function App() {
   const [includeSubtitles, setIncludeSubtitles] = useState(true);
   const [outputBlob, setOutputBlob] = useState(null);
   const [error, setError] = useState(null);
+  const [chatMessages, setChatMessages] = useState([]);
+  const [chatLoading, setChatLoading] = useState(false);
+  const [chatOpen, setChatOpen] = useState(false);
+  const assistantChatRef = useRef(null);
 
   const handleGenerateScenes = useCallback(async () => {
     if (!movieIdea.trim()) return;
@@ -113,6 +119,60 @@ function App() {
       setGeneratingIndex(null);
     }
   }, [scenes, voice, voiceProvider, elevenLabsVoiceId]);
+
+  const handleAssistantScript = useCallback((args) => {
+    if (!args?.scenes || !Array.isArray(args.scenes)) return;
+    const normalized = args.scenes.map((s) => initialScene(s));
+    setScenes(normalized);
+    setProjectName(getProjectName());
+  }, []);
+
+  const handleChatSend = useCallback(
+    async (message) => {
+      if (!message.trim()) return;
+      setChatMessages((prev) => [...prev, { role: 'user', content: message }]);
+      setChatLoading(true);
+      setError(null);
+      try {
+        console.log('[AI Reel Maker] Sending message...');
+        if (!assistantChatRef.current) {
+          assistantChatRef.current = await createAssistantChat();
+          console.log('[AI Reel Maker] Chat created');
+        }
+        const chat = assistantChatRef.current;
+        if (!chat) {
+          setChatMessages((prev) => [...prev, { role: 'assistant', content: 'API key not configured. Add REACT_APP_GEMINI_API_KEY to .env' }]);
+          return;
+        }
+        setChatMessages((prev) => [...prev, { role: 'assistant', content: '' }]);
+        const onChunk = (text) => {
+          setChatMessages((prev) => {
+            const next = [...prev];
+            const last = next[next.length - 1];
+            if (last?.role === 'assistant') next[next.length - 1] = { ...last, content: text };
+            return next;
+          });
+        };
+        await sendAssistantMessage(chat, message, handleAssistantScript, anchorImages, onChunk);
+      } catch (err) {
+        console.error('[AI Reel Maker] Error:', err);
+        setChatMessages((prev) => {
+          const next = [...prev];
+          const last = next[next.length - 1];
+          if (last?.role === 'assistant' && last?.content === '') {
+            next[next.length - 1] = { ...last, content: err?.message || 'Failed to get response' };
+          } else {
+            next.push({ role: 'assistant', content: err?.message || 'Failed to get response' });
+          }
+          return next;
+        });
+        setError(err?.message || 'Assistant error');
+      } finally {
+        setChatLoading(false);
+      }
+    },
+    [handleAssistantScript, anchorImages]
+  );
 
   const handleAssemble = useCallback(async () => {
     const ready = scenes.filter((s) => s.imageBlob && s.audioBlob);
@@ -215,6 +275,27 @@ function App() {
           </>
         )}
       </div>
+
+      {chatOpen ? (
+        <ChatAssistant
+          messages={chatMessages}
+          onSend={handleChatSend}
+          loading={chatLoading}
+          onClose={() => setChatOpen(false)}
+          isOpen={true}
+        />
+      ) : (
+        <button
+          type="button"
+          onClick={() => setChatOpen(true)}
+          className="fixed bottom-6 right-6 w-14 h-14 rounded-full bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg flex items-center justify-center z-40 transition-colors"
+          aria-label="Open assistant"
+        >
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+          </svg>
+        </button>
+      )}
     </div>
   );
 }

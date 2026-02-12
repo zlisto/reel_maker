@@ -1,10 +1,12 @@
-# Gemini Movie Maker
+# AI Reel Maker
 
 Create videos from an idea using AI. Enter a movie concept, and the app generates a script with scenes, then produces static images and narration for each scene. Finally, it assembles everything into a downloadable video.
 
 ## What It Does
 
-1. **Script from idea** – AI (Gemini) turns your movie idea into a JSON script with scenes, each with a visual description and narration text.
+1. **Script from idea** – AI (Gemini) turns your movie idea into a script with scenes, each with a visual description and narration text. Two ways to generate:
+   - **Generate Scenes button** – Enter your idea and click to generate.
+   - **AI Chat Assistant** – Click the chat button (bottom-right) to brainstorm with an AI agent. Describe your idea, mood, and anchor images; the assistant calls the `generateMovieScript` tool to write scenes directly into the scene editor.
 
 2. **Images** – AI (Gemini) generates images for each scene from the descriptions. Optional anchor images can be used as style references.
 
@@ -12,7 +14,7 @@ Create videos from an idea using AI. Enter a movie concept, and the app generate
    - **Gemini** – Built-in voices (Kore, Aoede, Callirrhoe)
    - **ElevenLabs** – Higher quality voices (requires API key)
 
-4. **Video assembly** – Assembles images and audio into a video with optional burned-in subtitles. Output is 1280×720 HD.
+4. **Video Generation** – Assembles images and audio into a 9:16 reel with optional burned-in subtitles. Output is 720×1280.
 
 ## How to Run
 
