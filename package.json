@@ -1,0 +1,49 @@
+{
+  "name": "test",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "@ffmpeg/ffmpeg": "^0.12.15",
+    "dejavu-fonts-ttf": "^2.37.3",
+    "@ffmpeg/util": "^0.12.2",
+    "@google/genai": "^1.40.0",
+    "@testing-library/dom": "^10.4.1",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@testing-library/user-event": "^13.5.0",
+    "autoprefixer": "^10.4.24",
+    "coi-serviceworker": "^0.1.7",
+    "http-proxy-middleware": "^3.0.5",
+    "postcss": "^8.5.6",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "react-scripts": "5.0.1",
+    "tailwindcss": "^3.4.19",
+    "web-vitals": "^2.1.4"
+  },
+  "scripts": {
+    "postinstall": "node -e \"const fs=require('fs'),path=require('path');const d=path.join(process.cwd(),'public','fonts');fs.mkdirSync(d,{recursive:true});const src=path.join(process.cwd(),'node_modules','dejavu-fonts-ttf','ttf','DejaVuSans.ttf');if(fs.existsSync(src))fs.copyFileSync(src,path.join(d,'DejaVuSans.ttf'));\"",
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
+}

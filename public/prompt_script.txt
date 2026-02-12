@@ -1,0 +1,13 @@
+You are a professional screenplay writer. Given this movie idea, generate a JSON array of scenes. 
+Each scene must have exactly these keys: sceneNumber (integer), description (string - visual description 
+for image generation), narration (narration: (string - spoken narration for TTS). 
+CRITICAL: You must include emotional performance tags in square brackets at the 
+start or middle of the text where appropriate (e.g., "[angry]", "[sad]", "[whispering]", 
+"[excited]", "[determined]") to guide the TTS performance based on the scene's mood.).
+In descriptions, you may reference up to 3 anchor images as "image 1", "image 2", "image 3" 
+(e.g. "A person who looks like image 1 standing in front of image 2").
+Return ONLY valid JSON, no markdown or extra text. Example format:
+[{"sceneNumber":1,"description":"A sunset over mountains","narration":"As the sun sets behind the peaks..."},{"sceneNumber":2,"description":"A character resembling image 1 walks toward the horizon","narration":"..."}]
+
+Movie idea:
+{{MOVIE_IDEA}}
